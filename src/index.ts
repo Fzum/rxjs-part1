@@ -1,21 +1,45 @@
-import { Observable } from 'rxjs';
+import { Observable } from "rxjs";
+import { map, tap } from "rxjs/operators";
 
-var observable = Observable.create((observer: any) => {
-    observer.next('Hello World');
-    observer.next('Hello Again!');
-    observer.complete();
-    observer.next('Bye');
+const environment = "http://localhost:8080";
+
+export interface Paket {
+  id: string;
+  imageIds: string[];
+}
+
+export interface PaketWithImage extends Paket {
+  imageUrls: string[];
+}
+
+const pakete$: Observable<Paket[]> = Observable.create((observer: any) => {
+  observer.next([
+    {
+      id: "1",
+      imageIds: ["1", "2", "3"],
+    },
+    {
+      id: "2",
+      imageIds: ["4", "5", "6"],
+    },
+    {
+      id: "3",
+      imageIds: ["7", "8", "9"],
+    },
+  ]);
 });
 
-observable.subscribe(
-    (x:any) => logItem(x),
-    (error: any) => logItem('Error: ' + error),
-    () => logItem('Completed')
-);
+const populateWithImageUrls = () =>
+  map((p: Paket[]) => {
+    return p.map(
+      (px: Paket) =>
+        ({
+          ...px,
+          imageUrls: px.imageIds.map((id) => `${environment}/images/${id}`),
+        } as PaketWithImage)
+    );
+  });
 
-function logItem(val:any) {
-    var node = document.createElement('li');
-    var textnode = document.createTextNode(val);
-    node.appendChild(textnode);
-    document.getElementById("list").appendChild(node);
-}
+pakete$
+  .pipe(tap(console.log), populateWithImageUrls(), tap(console.log))
+  .subscribe();
