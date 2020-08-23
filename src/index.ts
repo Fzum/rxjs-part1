@@ -8,10 +8,6 @@ export interface Paket {
   imageIds: string[];
 }
 
-export interface PaketWithImage extends Paket {
-  imageUrls: string[];
-}
-
 const pakete$: Observable<Paket[]> = Observable.create((observer: any) => {
   observer.next([
     {
